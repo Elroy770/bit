@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: bit
+      POSTGRES_USER: bit
+      POSTGRES_PASSWORD: local-only-change-me
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bit -d bit"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://bit:local-only-change-me@postgres:5432/bit
+      RECEIPTS_DIR: /data/receipts
+      AUTH_MODE: development
+    volumes: [receipts_data:/data]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports: ["8000:8000"]
+  cashier-ui:
+    build: ./cashier-ui
+    ports: ["8081:80"]
+  admin-ui:
+    build: ./admin-ui
+    ports: ["8082:80"]
+volumes:
+  postgres_data:
+  receipts_data:

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: cashier-ui, namespace: bit}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: cashier-ui}}
+  template:
+    metadata: {labels: {app: cashier-ui}}
+    spec:
+      containers:
+      - name: cashier-ui
+        image: ghcr.io/REPLACE_OWNER/bit-cashier-ui:latest
+        ports: [{containerPort: 80}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: cashier-ui, namespace: bit}
+spec:
+  selector: {app: cashier-ui}
+  ports: [{port: 80, targetPort: 80}]
