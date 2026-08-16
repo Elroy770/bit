@@ -18,6 +18,7 @@ This file is the implementation ledger. Each entry records completed work and ve
 - Configured the existing nginx Ingress/LoadBalancer with host `bit.elroy.site`, routes `/cashier`, `/admin`, `/api`, and cert-manager TLS secret `bit-tls`.
 - Verified publicly: HTTP redirects to HTTPS; HTTPS Cashier HTTP 200; HTTPS Admin HTTP 200; HTTPS API health returns `{"status":"ok"}`; certificate is Ready and issued by `letsencrypt-prod`.
 - Added a root fallback: `https://bit.elroy.site/` now redirects to `/cashier/` instead of returning 404, and verified the redirect publicly.
+- Investigated slow transaction saves and Admin `NaN`/`undefined`: Kubernetes resources were healthy and API requests returned quickly, but protected endpoints returned `401 Authentication required` because the cluster is in `AUTH_MODE=proxy` without an OAuth2 Proxy in front. Updated both UIs to handle API errors safely; Admin now renders numeric zero values instead of `NaN`/`undefined`, and Cashier shows a clear authentication message. Rebuilt and rolled out both UI deployments; public UI routes returned HTTP 200.
 
 ## Verification checklist
 
