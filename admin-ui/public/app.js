@@ -1,4 +1,5 @@
 let selected = [];
+let openCustomerPhone = null;
 const loginForm = document.querySelector("#login-form");
 const loginPanel = document.querySelector("#login-panel");
 const appContent = document.querySelector("#app-content");
@@ -76,16 +77,18 @@ function toggle(phone) {
 }
 
 async function show(phone) {
+  openCustomerPhone = phone;
   const { response, body } = await jsonResponse(`/api/customers/${phone}`);
   if (!response.ok) return;
-  document.querySelector("#detail").innerHTML = `<h2>${body.name} — ${body.phone}</h2><p>חיובים: ${money(body.total_amount)} | שולם: ${money(body.total_paid)} | חוב: ${money(body.balance)}</p>` + (body.transactions || []).map((transaction) => `<article class="card"><b>${new Date(transaction.created_at).toLocaleDateString("he-IL")}</b> — ${money(transaction.amount)} — ${Number(transaction.balance) === 0 ? "שולם" : "לא שולם"}<br>${transaction.note || ""}<br><label>שולם: <input id="paid-${transaction.id}" type="number" value="${transaction.paid_amount || 0}" step="0.01"><button onclick="pay(${transaction.id})">עדכן</button></label></article>`).join("");
+  document.querySelector("#detail").innerHTML = `<h2>${body.name} — ${body.phone}</h2><p>חיובים: ${money(body.total_amount)} | שולם: ${money(body.total_paid)} | חוב: ${money(body.balance)}</p>` + (body.transactions || []).map((transaction) => `<article class="card"><b>${new Date(transaction.created_at).toLocaleDateString("he-IL")}</b> — ${money(transaction.amount)} — ${Number(transaction.balance) === 0 ? "שולם" : "לא שולם"}<br>${transaction.note || ""}<br><label>שולם: <input id="paid-${transaction.id}" type="number" value="${transaction.paid_amount || 0}" step="0.01"><button onclick="pay(${transaction.id})">עדכן</button></label>${transaction.receipt_path ? `<div><a href="/api/receipts/${encodeURIComponent(transaction.receipt_path)}" target="_blank" rel="noopener">הצג קבלה</a><br><img class="receipt" src="/api/receipts/${encodeURIComponent(transaction.receipt_path)}" alt="קבלה" loading="lazy"></div>` : ""}</article>`).join("");
 }
 
 async function pay(id) {
   const paid = document.querySelector(`#paid-${id}`).value;
   const { response } = await jsonResponse(`/api/transactions/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paid_amount: paid }) });
   document.querySelector("#message").textContent = response.ok ? "עודכן" : "העדכון נכשל";
-  load();
+  await load();
+  if (response.ok && openCustomerPhone) await show(openCustomerPhone);
 }
 
 async function whatsapp() {

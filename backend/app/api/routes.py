@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
+from pathlib import Path
 from fastapi import APIRouter, Cookie, Depends, File, Form, HTTPException, Response, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import delete, select
@@ -160,6 +162,17 @@ def customer(phone: str, db: Session = Depends(get_db), _: User = Depends(admin_
         raise HTTPException(404, "customer not found")
     transactions = db.scalars(select(Transaction).where(Transaction.phone == phone).order_by(Transaction.created_at.desc())).all()
     return {**result[0], "transactions": [as_dict(transaction) for transaction in transactions]}
+
+
+@router.get("/receipts/{receipt_name}")
+def get_receipt(receipt_name: str, _: User = Depends(admin_user)):
+    safe_name = Path(receipt_name).name
+    if safe_name != receipt_name:
+        raise HTTPException(404, "receipt not found")
+    path = Path(settings.receipts_dir) / safe_name
+    if not path.is_file():
+        raise HTTPException(404, "receipt not found")
+    return FileResponse(path)
 
 
 @router.get("/dashboard")

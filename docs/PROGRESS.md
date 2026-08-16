@@ -19,7 +19,11 @@ This file is the implementation ledger. Each entry records completed work and ve
 - Verified publicly: HTTP redirects to HTTPS; HTTPS Cashier HTTP 200; HTTPS Admin HTTP 200; HTTPS API health returns `{"status":"ok"}`; certificate is Ready and issued by `letsencrypt-prod`.
 - Added a root fallback: `https://bit.elroy.site/` now redirects to `/cashier/` instead of returning 404, and verified the redirect publicly.
 - Investigated slow transaction saves and Admin `NaN`/`undefined`: Kubernetes resources were healthy and API requests returned quickly, but protected endpoints returned `401 Authentication required` because the cluster is in `AUTH_MODE=proxy` without an OAuth2 Proxy in front. Updated both UIs to handle API errors safely; Admin now renders numeric zero values instead of `NaN`/`undefined`, and Cashier shows a clear authentication message. Rebuilt and rolled out both UI deployments; public UI routes returned HTTP 200.
-- Implemented and deployed local authentication for exactly two users/roles. Added Argon2id password hashes, `users` and `sessions` migrations, server-side hashed sessions, HttpOnly/Secure cookies, login/logout/me endpoints, role guards, and separate UI login screens. Generated random bootstrap credentials on the server and stored them only in Kubernetes Secret `bit-auth` and local mode-600 file `.initial-credentials` (ignored by Git). Verified cashier login/me, remembered-session login, cashier denial from admin API (`403`), admin login/me, admin dashboard (`200`), and admin denial from cashier transaction API (`403`).
+- Synchronized updated credentials from Kubernetes Secret `bit-auth`: on startup, configured password hashes are compared using Argon2 verification; changed secrets rehash the corresponding user and invalidate that user's old sessions. Verified new admin login `200`, old admin password `401`, and new cashier login `200` without exposing values.
+- Updated cashier login copy to `זכור אותי`.
+- Fixed Admin payment editing refresh: after changing `paid_amount`, both the upper customer summary and the expanded transaction detail are reloaded from the API.
+- Added authenticated receipt viewing for Admin: `/api/receipts/{filename}` validates safe filenames and requires the `admin` role; Admin detail now shows a thumbnail and `הצג קבלה` link when a receipt exists. Cashier access is denied (`403`).
+
 
 ## Verification checklist
 

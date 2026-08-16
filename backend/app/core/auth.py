@@ -35,6 +35,12 @@ def bootstrap_users(db: Session) -> None:
         user = db.scalar(select(User).where(User.username == username))
         if user is None:
             db.add(User(username=username, password_hash=hash_password(password), role=role))
+        else:
+            if user.role != role:
+                user.role = role
+            if not verify_password(password, user.password_hash):
+                user.password_hash = hash_password(password)
+                db.execute(delete(LoginSession).where(LoginSession.user_id == user.id))
     db.commit()
 
 
