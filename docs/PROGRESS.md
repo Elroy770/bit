@@ -17,6 +17,7 @@ This file is the implementation ledger. Each entry records completed work and ve
 - Deployed to the existing single-node Kubernetes cluster after restarting containerd with approval because the node had a TTRPC shim failure. PostgreSQL and receipt PVCs became Bound; all Bit Deployments became Ready.
 - Configured the existing nginx Ingress/LoadBalancer with host `bit.elroy.site`, routes `/cashier`, `/admin`, `/api`, and cert-manager TLS secret `bit-tls`.
 - Verified publicly: HTTP redirects to HTTPS; HTTPS Cashier HTTP 200; HTTPS Admin HTTP 200; HTTPS API health returns `{"status":"ok"}`; certificate is Ready and issued by `letsencrypt-prod`.
+- Added a root fallback: `https://bit.elroy.site/` now redirects to `/cashier/` instead of returning 404, and verified the redirect publicly.
 
 ## Verification checklist
 
