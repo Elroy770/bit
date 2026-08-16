@@ -4,7 +4,7 @@ Internal web system for recording Bit-related transactions and tracking outstand
 
 ## Current status
 
-See [`docs/PROGRESS.md`](docs/PROGRESS.md) for the implementation ledger and verification evidence. The final domain is **not configured yet**; `bit.example.com` is only a placeholder in Kubernetes.
+See [`docs/PROGRESS.md`](docs/PROGRESS.md) for the implementation ledger and verification evidence. The deployed domain is `https://bit.elroy.site`.
 
 ## Architecture
 

@@ -9,7 +9,8 @@ spec:
     spec:
       containers:
       - name: cashier-ui
-        image: ghcr.io/REPLACE_OWNER/bit-cashier-ui:latest
+        image: bit-cashier-ui:local
+        imagePullPolicy: Never
         ports: [{containerPort: 80}]
 ---
 apiVersion: v1

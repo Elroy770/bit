@@ -4,11 +4,17 @@ metadata:
   name: bit
   namespace: bit
   annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: 5m
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  tls:
+  - hosts:
+    - bit.elroy.site
+    secretName: bit-tls
   rules:
-  - host: bit.example.com # Replace only after choosing the real domain
+  - host: bit.elroy.site
     http:
       paths:
       - path: /cashier

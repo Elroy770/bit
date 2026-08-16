@@ -4,7 +4,7 @@ metadata: {name: bit-backend-config, namespace: bit}
 data:
   RECEIPTS_DIR: /data/receipts
   AUTH_MODE: proxy
-  CORS_ORIGINS: https://bit.example.com
+  CORS_ORIGINS: https://bit.elroy.site
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -17,13 +17,18 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ghcr.io/REPLACE_OWNER/bit-backend:latest
+        image: bit-backend:local
+        imagePullPolicy: Never
         envFrom: [{configMapRef: {name: bit-backend-config}}]
         env:
         - name: DATABASE_URL
           valueFrom: {secretKeyRef: {name: bit-postgres, key: DATABASE_URL}}
         ports: [{containerPort: 8000}]
         readinessProbe: {httpGet: {path: /api/health, port: 8000}}
+        volumeMounts:
+        - {name: receipts, mountPath: /data/receipts}
+      volumes:
+      - {name: receipts, persistentVolumeClaim: {claimName: receipts-data}}
 ---
 apiVersion: v1
 kind: Service

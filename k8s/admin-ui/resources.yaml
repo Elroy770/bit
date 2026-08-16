@@ -9,7 +9,8 @@ spec:
     spec:
       containers:
       - name: admin-ui
-        image: ghcr.io/REPLACE_OWNER/bit-admin-ui:latest
+        image: bit-admin-ui:local
+        imagePullPolicy: Never
         ports: [{containerPort: 80}]
 ---
 apiVersion: v1

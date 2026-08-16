@@ -14,6 +14,9 @@ This file is the implementation ledger. Each entry records completed work and ve
 - Implemented separate cashier/admin UIs with sub-path-safe nginx configs and WhatsApp link generation.
 - Added Docker Compose and Kubernetes resources with out-of-band Secret placeholders; no final domain was selected or configured.
 - Verified `pytest -q`: 3 passed. Verified Docker Compose config and Kubernetes client-side manifests: OK.
+- Deployed to the existing single-node Kubernetes cluster after restarting containerd with approval because the node had a TTRPC shim failure. PostgreSQL and receipt PVCs became Bound; all Bit Deployments became Ready.
+- Configured the existing nginx Ingress/LoadBalancer with host `bit.elroy.site`, routes `/cashier`, `/admin`, `/api`, and cert-manager TLS secret `bit-tls`.
+- Verified publicly: HTTP redirects to HTTPS; HTTPS Cashier HTTP 200; HTTPS Admin HTTP 200; HTTPS API health returns `{"status":"ok"}`; certificate is Ready and issued by `letsencrypt-prod`.
 
 ## Verification checklist
 
