@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: {name: cashier-ui, namespace: bit}
+metadata: { name: cashier-ui, namespace: bit }
 spec:
   replicas: 2
-  selector: {matchLabels: {app: cashier-ui}}
+  selector: { matchLabels: { app: cashier-ui } }
   template:
-    metadata: {labels: {app: cashier-ui}}
+    metadata: { labels: { app: cashier-ui } }
     spec:
       containers:
-      - name: cashier-ui
-        image: bit-cashier-ui:local
-        imagePullPolicy: Never
-        ports: [{containerPort: 80}]
+        - name: cashier-ui
+          image: elroymalayov/bit-cashier-ui:01
+          imagePullPolicy: IfNotPresent
+          ports: [{ containerPort: 80 }]
 ---
 apiVersion: v1
 kind: Service
-metadata: {name: cashier-ui, namespace: bit}
+metadata: { name: cashier-ui, namespace: bit }
 spec:
-  selector: {app: cashier-ui}
-  ports: [{port: 80, targetPort: 80}]
+  selector: { app: cashier-ui }
+  ports: [{ port: 80, targetPort: 80 }]

@@ -12,6 +12,7 @@ services:
       timeout: 3s
       retries: 15
   backend:
+    image: elroymalayov/bit-backend:01
     build: ./backend
     environment:
       DATABASE_URL: postgresql+psycopg://bit:local-only-change-me@postgres:5432/bit
@@ -23,9 +24,11 @@ services:
         condition: service_healthy
     ports: ["8000:8000"]
   cashier-ui:
+    image: elroymalayov/bit-cashier-ui:01
     build: ./cashier-ui
     ports: ["8081:80"]
   admin-ui:
+    image: elroymalayov/bit-admin-ui:01
     build: ./admin-ui
     ports: ["8082:80"]
 volumes:

@@ -1,1 +1,162 @@
-<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>bit — ניהול</title><link rel="stylesheet" href="style.css"></head><body><main><section id="login-panel"><h1>כניסה לניהול</h1><form id="login-form"><label>שם משתמש<input name="username" value="admin" autocomplete="username" required></label><label>סיסמה<input name="password" type="password" autocomplete="current-password" required></label><label><input name="remember" type="checkbox"> זכור אותי במחשב זה</label><button>התחבר</button></form><p id="login-message" role="alert"></p></section><section id="app-content" hidden><h1>ניהול חובות</h1><section id="summary" class="grid"></section><div class="row"><input id="search" placeholder="חיפוש שם או טלפון"><label><input id="debt" type="checkbox"> רק חייבים</label><button onclick="load()">חיפוש</button><button onclick="whatsapp()">שלח הודעה ב-WhatsApp</button><button id="logout">התנתק</button></div><p id="message"></p><table><thead><tr><th>בחר</th><th>לקוח</th><th>טלפון</th><th>עסקאות</th><th>חוב</th><th></th></tr></thead><tbody id="customers"></tbody></table><div id="detail"></div></section></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#059669" />
+    <title>bit — ניהול</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">bit</span>
+        <span class="brand-text">
+          <strong>ממשק ניהול</strong>
+          <small>מעקב חובות ותשלומי לקוחות</small>
+        </span>
+      </div>
+      <div class="topbar-actions" id="session-actions" hidden>
+        <span class="chip" id="user-chip"></span>
+        <button class="btn btn-ghost" type="button" id="logout">התנתק</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="login-panel" class="panel panel-narrow" hidden>
+        <div class="card">
+          <h1>כניסה לניהול</h1>
+          <p class="subtitle">התחבר עם משתמש בעל הרשאת אדמין.</p>
+          <form id="login-form" novalidate>
+            <div class="field">
+              <label for="login-username">שם משתמש</label>
+              <input
+                id="login-username"
+                name="username"
+                type="text"
+                value="admin"
+                autocomplete="username"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="login-password">סיסמה</label>
+              <div class="input-group">
+                <input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                />
+                <button
+                  class="btn btn-secondary btn-sm"
+                  type="button"
+                  id="toggle-password"
+                  aria-controls="login-password"
+                >
+                  הצג
+                </button>
+              </div>
+            </div>
+            <label class="checkbox">
+              <input type="checkbox" name="remember" />
+              <span>זכור אותי במחשב זה</span>
+            </label>
+            <button
+              class="btn btn-primary btn-block"
+              type="submit"
+              id="login-submit"
+            >
+              התחבר
+            </button>
+          </form>
+          <p id="login-message" class="msg" role="alert"></p>
+        </div>
+        <p class="footer-note"><a href="/">מעבר לעמדת הקופה</a></p>
+      </section>
+
+      <section id="app-content" class="panel" hidden>
+        <div class="stats" id="stats">
+          <div class="stat stat-debt">
+            <span>סה"כ חוב פתוח</span><strong id="stat-debt">0.00 ₪</strong>
+          </div>
+          <div class="stat">
+            <span>לקוחות חייבים</span><strong id="stat-debtors">0</strong>
+          </div>
+          <div class="stat">
+            <span>לקוחות ברשימה</span><strong id="stat-customers">0</strong>
+          </div>
+          <div class="stat stat-ok">
+            <span>סה"כ נגבה</span><strong id="stat-paid">0.00 ₪</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>לקוחות</h2>
+            <span class="chip" id="selection-chip" hidden></span>
+          </div>
+
+          <div class="toolbar">
+            <input
+              class="search"
+              id="search"
+              type="search"
+              placeholder="חיפוש לפי שם או טלפון"
+              autocomplete="off"
+            />
+            <label class="checkbox" style="margin: 0"
+              ><input id="debt" type="checkbox" /><span>רק חייבים</span></label
+            >
+            <button class="btn btn-secondary" type="button" id="refresh">
+              רענן
+            </button>
+            <span class="spacer"></span>
+            <button
+              class="btn btn-whatsapp"
+              type="button"
+              id="whatsapp"
+              disabled
+            >
+              שלח תזכורת ב-WhatsApp
+            </button>
+          </div>
+
+          <p id="message" class="msg" role="status"></p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      id="select-all"
+                      aria-label="בחר את כל הלקוחות"
+                    />
+                  </th>
+                  <th>לקוח</th>
+                  <th>טלפון</th>
+                  <th class="num">עסקאות</th>
+                  <th class="num">חוב</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="customers"></tbody>
+            </table>
+            <div class="empty-state" id="empty" hidden>
+              לא נמצאו לקוחות מתאימים.
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="detail" hidden></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>

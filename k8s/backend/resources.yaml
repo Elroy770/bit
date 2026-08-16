@@ -1,6 +1,6 @@
 apiVersion: v1
 kind: ConfigMap
-metadata: {name: bit-backend-config, namespace: bit}
+metadata: { name: bit-backend-config, namespace: bit }
 data:
   RECEIPTS_DIR: /data/receipts
   AUTH_MODE: local
@@ -8,39 +8,47 @@ data:
 ---
 apiVersion: apps/v1
 kind: Deployment
-metadata: {name: backend, namespace: bit}
+metadata: { name: backend, namespace: bit }
 spec:
   replicas: 2
-  selector: {matchLabels: {app: backend}}
+  selector: { matchLabels: { app: backend } }
   template:
-    metadata: {labels: {app: backend}}
+    metadata: { labels: { app: backend } }
     spec:
       containers:
-      - name: backend
-        image: bit-backend:local
-        imagePullPolicy: Never
-        envFrom: [{configMapRef: {name: bit-backend-config}}]
-        env:
-        - name: DATABASE_URL
-          valueFrom: {secretKeyRef: {name: bit-postgres, key: DATABASE_URL}}
-        - name: CASHIER_USERNAME
-          valueFrom: {secretKeyRef: {name: bit-auth, key: CASHIER_USERNAME}}
-        - name: CASHIER_PASSWORD
-          valueFrom: {secretKeyRef: {name: bit-auth, key: CASHIER_PASSWORD}}
-        - name: ADMIN_USERNAME
-          valueFrom: {secretKeyRef: {name: bit-auth, key: ADMIN_USERNAME}}
-        - name: ADMIN_PASSWORD
-          valueFrom: {secretKeyRef: {name: bit-auth, key: ADMIN_PASSWORD}}
-        ports: [{containerPort: 8000}]
-        readinessProbe: {httpGet: {path: /api/health, port: 8000}}
-        volumeMounts:
-        - {name: receipts, mountPath: /data/receipts}
+        - name: backend
+          image: elroymalayov/bit-backend:01
+          imagePullPolicy: IfNotPresent
+          envFrom: [{ configMapRef: { name: bit-backend-config } }]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                { secretKeyRef: { name: bit-postgres, key: DATABASE_URL } }
+            - name: CASHIER_USERNAME
+              valueFrom:
+                { secretKeyRef: { name: bit-auth, key: CASHIER_USERNAME } }
+            - name: CASHIER_PASSWORD
+              valueFrom:
+                { secretKeyRef: { name: bit-auth, key: CASHIER_PASSWORD } }
+            - name: ADMIN_USERNAME
+              valueFrom:
+                { secretKeyRef: { name: bit-auth, key: ADMIN_USERNAME } }
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                { secretKeyRef: { name: bit-auth, key: ADMIN_PASSWORD } }
+          ports: [{ containerPort: 8000 }]
+          readinessProbe: { httpGet: { path: /api/health, port: 8000 } }
+          volumeMounts:
+            - { name: receipts, mountPath: /data/receipts }
       volumes:
-      - {name: receipts, persistentVolumeClaim: {claimName: receipts-data}}
+        - {
+            name: receipts,
+            persistentVolumeClaim: { claimName: receipts-data },
+          }
 ---
 apiVersion: v1
 kind: Service
-metadata: {name: backend, namespace: bit}
+metadata: { name: backend, namespace: bit }
 spec:
-  selector: {app: backend}
-  ports: [{port: 8000, targetPort: 8000}]
+  selector: { app: backend }
+  ports: [{ port: 8000, targetPort: 8000 }]

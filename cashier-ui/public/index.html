@@ -1,1 +1,231 @@
-<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>bit — קופה</title><link rel="stylesheet" href="style.css"></head><body><main><section id="login-panel"><h1>כניסה לקופה</h1><form id="login-form"><label>שם משתמש<input name="username" value="cashier" autocomplete="username" required></label><label>סיסמה<input name="password" type="password" autocomplete="current-password" required></label><label><input name="remember" type="checkbox" checked> זכור אותי</label><button>התחבר</button></form><p id="login-message" role="alert"></p></section><section id="app-content" hidden><h1>שמירת עסקה</h1><p>הזן את פרטי התשלום ושמור.</p><form id="form"><label>שם<input name="name" required autofocus></label><label>מספר טלפון<input name="phone" inputmode="tel" required></label><label>סכום<input name="amount" type="number" min="0.01" step="0.01" required></label><label>שולם עכשיו<input name="paid_amount" type="number" min="0" step="0.01" value="0"></label><label>הערה<textarea name="note"></textarea></label><label>צילום קבלה<input name="receipt" type="file" accept="image/jpeg,image/png,image/webp"></label><button>שמור עסקה</button></form><p id="message" role="status"></p><button id="logout">התנתק</button><p><a href="/admin/">כניסה לניהול</a></p></section></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#059669" />
+    <title>bit — קופה</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">bit</span>
+        <span class="brand-text">
+          <strong>עמדת קופה</strong>
+          <small>רישום עסקאות ותשלומים</small>
+        </span>
+      </div>
+      <div class="topbar-actions" id="session-actions" hidden>
+        <span class="chip" id="user-chip"></span>
+        <button class="btn btn-ghost" type="button" id="logout">התנתק</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="login-panel" class="panel panel-narrow" hidden>
+        <div class="card">
+          <h1>כניסה לקופה</h1>
+          <p class="subtitle">התחבר עם שם המשתמש והסיסמה של הקופה.</p>
+          <form id="login-form" novalidate>
+            <div class="field">
+              <label for="login-username">שם משתמש</label>
+              <input
+                id="login-username"
+                name="username"
+                type="text"
+                value="cashier"
+                autocomplete="username"
+                required
+              />
+            </div>
+            <div class="field">
+              <label for="login-password">סיסמה</label>
+              <div class="input-group">
+                <input
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                />
+                <button
+                  class="btn btn-secondary btn-sm"
+                  type="button"
+                  id="toggle-password"
+                  aria-controls="login-password"
+                >
+                  הצג
+                </button>
+              </div>
+            </div>
+            <label class="checkbox">
+              <input type="checkbox" name="remember" checked />
+              <span>זכור אותי במכשיר זה</span>
+            </label>
+            <button
+              class="btn btn-primary btn-block"
+              type="submit"
+              id="login-submit"
+            >
+              התחבר
+            </button>
+          </form>
+          <p id="login-message" class="msg" role="alert"></p>
+        </div>
+        <p class="footer-note"><a href="/admin/">מעבר לממשק הניהול</a></p>
+      </section>
+
+      <section id="app-content" class="panel" hidden>
+        <div class="layout">
+          <form id="form" class="card" novalidate>
+            <div class="card-header">
+              <div>
+                <h1>עסקה חדשה</h1>
+                <p class="subtitle">
+                  מלא את פרטי הלקוח והתשלום ושמור את העסקה.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid-fields">
+              <div class="field">
+                <label for="name">שם הלקוח</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autocomplete="off"
+                  required
+                  autofocus
+                />
+              </div>
+              <div class="field">
+                <label for="phone">מספר טלפון</label>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputmode="tel"
+                  autocomplete="off"
+                  placeholder="050-0000000"
+                  required
+                />
+                <span class="hint">מספר ישראלי, למשל 0501234567</span>
+              </div>
+              <div class="field">
+                <label for="amount">סכום העסקה (₪)</label>
+                <input
+                  id="amount"
+                  name="amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="paid_amount">שולם עכשיו (₪)</label>
+                <input
+                  id="paid_amount"
+                  name="paid_amount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  value="0"
+                />
+                <div class="chips" id="paid-shortcuts">
+                  <button class="chip" type="button" data-paid="none">
+                    לא שולם
+                  </button>
+                  <button class="chip" type="button" data-paid="half">
+                    חצי
+                  </button>
+                  <button class="chip" type="button" data-paid="full">
+                    תשלום מלא
+                  </button>
+                </div>
+              </div>
+              <div class="field field-wide">
+                <label for="note">הערה</label>
+                <textarea
+                  id="note"
+                  name="note"
+                  maxlength="2000"
+                  placeholder="פרטים נוספים על העסקה (לא חובה)"
+                ></textarea>
+              </div>
+              <div class="field field-wide">
+                <span class="label">צילום קבלה</span>
+                <label class="file-drop" id="file-drop">
+                  <span class="file-drop-text">
+                    <span id="file-name">גרור לכאן תמונה או לחץ לבחירה</span>
+                    <small>JPG, PNG או WEBP · עד 5MB</small>
+                  </span>
+                  <span class="btn btn-secondary btn-sm" aria-hidden="true"
+                    >בחר קובץ</span
+                  >
+                  <input
+                    id="receipt"
+                    name="receipt"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                  />
+                </label>
+                <div class="preview" id="preview" hidden>
+                  <img id="preview-image" alt="תצוגה מקדימה של הקבלה" />
+                  <button
+                    class="btn btn-ghost btn-sm"
+                    type="button"
+                    id="clear-receipt"
+                  >
+                    הסר קבלה
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p id="message" class="msg" role="status"></p>
+
+            <div class="transaction-actions">
+              <button class="btn btn-primary" type="submit" id="submit">
+                שמור עסקה
+              </button>
+              <button class="btn btn-secondary" type="reset" id="reset">
+                נקה טופס
+              </button>
+            </div>
+          </form>
+
+          <aside>
+            <div class="card">
+              <h2 class="section-title">סיכום העסקה</h2>
+              <ul class="summary-list">
+                <li><span>סכום</span><span id="sum-amount">0.00 ₪</span></li>
+                <li>
+                  <span>שולם עכשיו</span><span id="sum-paid">0.00 ₪</span>
+                </li>
+                <li class="total">
+                  <span>נותר לתשלום</span><span id="sum-balance">0.00 ₪</span>
+                </li>
+              </ul>
+            </div>
+            <div class="card">
+              <h2 class="section-title">נשמרו במשמרת זו</h2>
+              <ul class="recent" id="recent">
+                <li>עדיין לא נשמרו עסקאות.</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+        <p class="footer-note"><a href="/admin/">מעבר לממשק הניהול</a></p>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <script src="app.js"></script>
+  </body>
+</html>
