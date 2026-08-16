@@ -26,3 +26,6 @@ spec:
       - path: /api
         pathType: Prefix
         backend: {service: {name: backend, port: {number: 8000}}}
+      - path: /
+        pathType: Prefix
+        backend: {service: {name: cashier-ui, port: {number: 80}}}
