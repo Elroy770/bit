@@ -22,7 +22,13 @@ This file is the implementation ledger. Each entry records completed work and ve
 - Synchronized updated credentials from Kubernetes Secret `bit-auth`: on startup, configured password hashes are compared using Argon2 verification; changed secrets rehash the corresponding user and invalidate that user's old sessions. Verified new admin login `200`, old admin password `401`, and new cashier login `200` without exposing values.
 - Updated cashier login copy to `זכור אותי`.
 - Fixed Admin payment editing refresh: after changing `paid_amount`, both the upper customer summary and the expanded transaction detail are reloaded from the API.
-- Added authenticated receipt viewing for Admin: `/api/receipts/{filename}` validates safe filenames and requires the `admin` role; Admin detail now shows a thumbnail and `הצג קבלה` link when a receipt exists. Cashier access is denied (`403`).
+- Added authenticated receipt viewing for Admin: `/api/receipts/{filename}` validates safe filenames and requires the `admin` role; Admin detail shows a thumbnail and link when a receipt exists. Cashier access is denied (`403`).
+- Synced local Git with `origin/main` at commit `0068efb`, including the Docker Hub image format.
+- Fixed Cashier logout handling: the UI now checks the logout response, clears the form/session state, and confirms the server session is gone (`/api/auth/me` returns `401`).
+- Added Cashier customer lookup by phone via `GET /api/customers/lookup`; the endpoint is allowed for cashier/admin roles and the Cashier UI fills the existing customer name when a matching phone has transactions.
+- Added Admin transaction deletion UI with confirmation, backend deletion already role-protected for admin, and detail/table refresh after deletion.
+- Built and pushed Docker Hub images `elroymalayov/bit-backend:03`, `elroymalayov/bit-admin-ui:03`, and `elroymalayov/bit-cashier-ui:03`; updated Compose and Kubernetes manifests to tag `03` and rolled out successfully.
+- Verified end-to-end: Cashier login `200`, unknown lookup `404`, existing lookup `200`, valid transaction create `200`, logout `200`, post-logout `/me` `401`, Admin delete `200`, deleted transaction fetch `404`.
 
 
 ## Verification checklist

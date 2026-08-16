@@ -63,6 +63,18 @@ def test_edit_and_forbidden_transaction_creation(client):
     assert client.post("/api/transactions", data={"name": "A", "phone": "0501234567", "amount": "10"}).status_code == 403
 
 
+def test_lookup_and_admin_delete(client):
+    login(client, "cashier", "cashier-test-password")
+    created = client.post("/api/transactions", data={"name": "Existing Customer", "phone": "0501234567", "amount": "20"})
+    assert created.status_code == 200
+    assert client.get("/api/customers/lookup?phone=050-1234567").json()["name"] == "Existing Customer"
+    client.cookies.clear()
+    login(client, "admin", "admin-test-password")
+    transaction_id = created.json()["id"]
+    assert client.delete(f"/api/transactions/{transaction_id}").status_code == 200
+    assert client.get(f"/api/transactions/{transaction_id}").status_code == 404
+
+
 def test_invalid_login_and_logout(client):
     assert client.post("/api/auth/login", json={"username": "cashier", "password": "wrong"}).status_code == 401
     login(client, "cashier", "cashier-test-password")

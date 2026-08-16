@@ -15,6 +15,8 @@ const submitButton = $("#submit");
 const amountInput = $("#amount");
 const paidInput = $("#paid_amount");
 const phoneInput = $("#phone");
+const nameInput = $("#name");
+const customerLookup = $("#customer-lookup");
 const receiptInput = $("#receipt");
 const fileDrop = $("#file-drop");
 const fileName = $("#file-name");
@@ -40,6 +42,14 @@ function setLoading(button, loading) {
 function setMessage(element, text, kind = "") {
   element.textContent = text;
   element.className = `msg ${kind}`.trim();
+}
+
+function formatApiError(body, fallback) {
+  if (typeof body?.detail === "string") return body.detail;
+  if (Array.isArray(body?.detail)) {
+    return body.detail.map((item) => item.msg || item.message || "נתון לא תקין").join("; ");
+  }
+  return fallback;
 }
 
 function showToast(text, kind = "ok") {
@@ -204,11 +214,38 @@ $("#paid-shortcuts").addEventListener("click", (event) => {
   updateSummary();
 });
 
+async function lookupCustomer() {
+  const normalized = phoneInput.value.replace(/[\s-]/g, "");
+  if (!/^\+?[0-9]{7,15}$/.test(normalized)) {
+    customerLookup.textContent = "";
+    return;
+  }
+  customerLookup.textContent = "בודק לקוח...";
+  try {
+    const response = await fetch(`/api/customers/lookup?phone=${encodeURIComponent(normalized)}`);
+    if (response.ok) {
+      const customer = await response.json();
+      nameInput.value = customer.name || "";
+      customerLookup.textContent = customer.name ? `נמצא לקוח קיים: ${customer.name}` : "";
+    } else if (response.status === 404) {
+      customerLookup.textContent = "לקוח חדש";
+    } else if (response.status === 401) {
+      showLogin();
+      setMessage(loginMessage, "פג תוקף ההתחברות. התחבר מחדש.", "danger");
+    } else {
+      customerLookup.textContent = "לא ניתן לבדוק את הלקוח";
+    }
+  } catch {
+    customerLookup.textContent = "לא ניתן לבדוק את הלקוח";
+  }
+}
+
 phoneInput.addEventListener("blur", () => {
   const normalized = phoneInput.value.replace(/[\s-]/g, "");
   const valid = normalized === "" || /^\+?[0-9]{7,15}$/.test(normalized);
   phoneInput.setAttribute("aria-invalid", String(!valid));
   phoneInput.value = normalized;
+  if (valid && normalized) lookupCustomer();
 });
 
 receiptInput.addEventListener("change", () =>
@@ -289,7 +326,7 @@ form.addEventListener("submit", async (event) => {
     } else {
       setMessage(
         message,
-        typeof body.detail === "string" ? body.detail : "שמירת העסקה נכשלה",
+        formatApiError(body, "שמירת העסקה נכשלה"),
         "danger",
       );
       showToast("שמירת העסקה נכשלה", "danger");
@@ -302,11 +339,16 @@ form.addEventListener("submit", async (event) => {
 });
 
 $("#logout").addEventListener("click", async () => {
-  await fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+  const response = await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
   form.reset();
   clearReceipt();
   updateSummary();
+  if (!response || !response.ok) {
+    setMessage(message, "ההתנתקות נכשלה. נסה שוב.", "danger");
+    return;
+  }
   showLogin();
+  setMessage(loginMessage, "התנתקת בהצלחה.", "ok");
 });
 
 updateSummary();

@@ -155,6 +155,18 @@ def list_customers(search: str | None = None, debt_only: bool = False, db: Sessi
     return customers(db, search, debt_only)
 
 
+@router.get("/customers/lookup")
+def lookup_customer(phone: str, db: Session = Depends(get_db), user: User = Depends(current_user)):
+    if user.role not in {"cashier", "admin"}:
+        raise HTTPException(403, "Insufficient permissions")
+    normalized = phone.replace(" ", "").replace("-", "")
+    result = customers(db, normalized)
+    if not result:
+        raise HTTPException(404, "customer not found")
+    customer_data = result[0]
+    return {"name": customer_data["name"], "phone": customer_data["phone"]}
+
+
 @router.get("/customers/{phone}")
 def customer(phone: str, db: Session = Depends(get_db), _: User = Depends(admin_user)):
     result = customers(db, phone)

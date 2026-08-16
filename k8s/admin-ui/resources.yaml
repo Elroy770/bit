@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: admin-ui
-          image: elroymalayov/bit-admin-ui:01
+          image: elroymalayov/bit-admin-ui:03
           imagePullPolicy: IfNotPresent
           ports: [{ containerPort: 80 }]
 ---

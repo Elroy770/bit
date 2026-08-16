@@ -319,6 +319,15 @@ input[aria-invalid="true"] {
   border-color: #cbd5e1;
 }
 
+.btn-danger {
+  border-color: #fecaca;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.btn-danger:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
 .btn-ghost {
   background: transparent;
   border-color: transparent;

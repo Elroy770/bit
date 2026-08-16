@@ -255,6 +255,12 @@ function renderDetail(customer) {
           amount: String(transaction.amount),
         },
       }),
+      element("button", {
+        className: "btn btn-danger btn-sm",
+        text: "מחק עסקה",
+        attrs: { type: "button" },
+        dataset: { action: "delete", id: String(transaction.id) },
+      }),
     ]);
 
     const children = [
@@ -338,6 +344,26 @@ async function pay(id, value) {
   showToast("התשלום עודכן");
   await load();
   if (openPhone) await showCustomer(openPhone);
+}
+
+async function deleteTransaction(id) {
+  if (!window.confirm("למחוק את העסקה לצמיתות?")) return;
+  const { response, body } = await request(`/api/transactions/${id}`, { method: "DELETE" });
+  if (!response.ok) {
+    showToast(typeof body.detail === "string" ? body.detail : "מחיקת העסקה נכשלה", "danger");
+    return;
+  }
+  showToast("העסקה נמחקה");
+  await load();
+  if (openPhone) {
+    const remaining = customers.find((customer) => customer.phone === openPhone);
+    if (remaining) await showCustomer(openPhone);
+    else {
+      openPhone = null;
+      detail.hidden = true;
+      detail.replaceChildren();
+    }
+  }
 }
 
 loginForm.addEventListener("submit", async (event) => {
@@ -432,6 +458,9 @@ detail.addEventListener("click", (event) => {
   }
   if (button.dataset.action === "pay-full") {
     pay(button.dataset.id, button.dataset.amount);
+  }
+  if (button.dataset.action === "delete") {
+    deleteTransaction(button.dataset.id);
   }
 });
 

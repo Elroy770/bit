@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: cashier-ui
-          image: elroymalayov/bit-cashier-ui:01
+          image: elroymalayov/bit-cashier-ui:03
           imagePullPolicy: IfNotPresent
           ports: [{ containerPort: 80 }]
 ---

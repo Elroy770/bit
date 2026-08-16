@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: elroymalayov/bit-backend:01
+          image: elroymalayov/bit-backend:03
           imagePullPolicy: IfNotPresent
           envFrom: [{ configMapRef: { name: bit-backend-config } }]
           env:
