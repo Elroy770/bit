@@ -6,6 +6,13 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:8081,http://localhost:8082"
     auth_mode: str = "proxy"
     max_receipt_bytes: int = 5 * 1024 * 1024
+    cashier_username: str = "cashier"
+    cashier_password: str = ""
+    admin_username: str = "admin"
+    admin_password: str = ""
+    session_cookie_name: str = "bit_session"
+    session_hours: int = 8
+    remembered_session_days: int = 30
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property

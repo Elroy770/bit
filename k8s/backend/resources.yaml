@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata: {name: bit-backend-config, namespace: bit}
 data:
   RECEIPTS_DIR: /data/receipts
-  AUTH_MODE: proxy
+  AUTH_MODE: local
   CORS_ORIGINS: https://bit.elroy.site
 ---
 apiVersion: apps/v1
@@ -23,6 +23,14 @@ spec:
         env:
         - name: DATABASE_URL
           valueFrom: {secretKeyRef: {name: bit-postgres, key: DATABASE_URL}}
+        - name: CASHIER_USERNAME
+          valueFrom: {secretKeyRef: {name: bit-auth, key: CASHIER_USERNAME}}
+        - name: CASHIER_PASSWORD
+          valueFrom: {secretKeyRef: {name: bit-auth, key: CASHIER_PASSWORD}}
+        - name: ADMIN_USERNAME
+          valueFrom: {secretKeyRef: {name: bit-auth, key: ADMIN_USERNAME}}
+        - name: ADMIN_PASSWORD
+          valueFrom: {secretKeyRef: {name: bit-auth, key: ADMIN_PASSWORD}}
         ports: [{containerPort: 8000}]
         readinessProbe: {httpGet: {path: /api/health, port: 8000}}
         volumeMounts:

@@ -19,7 +19,9 @@ data/
 receipts/
 *.sqlite3
 
-# IDE / OS
+# Initial credentials generated outside Git
+.initial-credentials
+
 .vscode/
 .idea/
 .DS_Store
